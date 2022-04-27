@@ -154,6 +154,11 @@ for PROJECT in PROJECTS_ACCEPTED
     end
 end
 
+function check_exists(BB_HASH, PROJ_HASH, TARGET)
+    CACHE_URL = "https://julia-bb-buildcache.s3.amazonaws.com/$(BB_HASH)/$(PROJ_HASH)/$(TARGET).tar.gz"
+    return readchomp(`curl --output /tmp/curl_$(PROJ_HASH)_$(TARGET).log --silent --include --HEAD "$(CACHE_URL)" --write-out '%{http_code}'`)
+end
+
 println("Determining builds to queue...")
 for PROJECT in PROJECTS_ACCEPTED
     NAME = basename(PROJECT)
@@ -193,9 +198,8 @@ for PROJECT in PROJECTS_ACCEPTED
         # fi
 
         # Here, we hit the build cache to see if we can skip this particular combo
-        CACHE_URL = "https://julia-bb-buildcache.s3.amazonaws.com/$(BB_HASH)/$(PROJ_HASH)/$(PLATFORM).tar.gz"
-        CURL_HTTP_CODE = readchomp(`curl --output /tmp/curl_$(PROJ_HASH)_$(PLATFORM).log --silent --include --HEAD "$(CACHE_URL)" --write-out '%{http_code}'`)
-        if CURL_HTTP_CODE == "200"
+        if check_exists(BB_HASH, PROJ_HASH, PLATFORM) == "200" &&
+           check_exists(BB_HASH, PROJ_HASH, PLATFORM*"-logs") == "200"
             println("    $(PLATFORM): skipping, existant")
             continue
         end
