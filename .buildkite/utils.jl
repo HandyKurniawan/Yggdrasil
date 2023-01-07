@@ -110,7 +110,7 @@ function build_step(NAME, PLATFORM, PROJECT, BB_HASH, PROJ_HASH)
 
     echo "--- Upload"
 
-    export BUILDKITE_ARTIFACT_UPLOAD_DESTINATION="s3://julia-bb-buildcache/${BB_HASH}/${PROJ_HASH}"
+    # export BUILDKITE_ARTIFACT_UPLOAD_DESTINATION="s3://julia-bb-buildcache/${BB_HASH}/${PROJ_HASH}"
     buildkite-agent artifact upload "./products/${NAME%@*}*${PLATFORM}*.tar.gz"
     """
 
